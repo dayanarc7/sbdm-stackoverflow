@@ -223,7 +223,5 @@ ALTER TABLE m2013 DROP COLUMN ocupacion
 UPDATE m2013 SET ingresos = NULL WHERE ingresos = 'Student / Unemployed'
 UPDATE m2013 SET ingresos = NULL WHERE ingresos = 'Rather not say'
 
-
  --ELIMINANDO LAS PRIMERAS DOS FILAS
-
 DELETE FROM m2013 WHERE pais = 'What Country or Region do you live in?' OR pais = 'Response'

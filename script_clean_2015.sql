@@ -326,4 +326,4 @@ ALTER TABLE m2015 DROP COLUMN ocupacion
 
  --ELIMINANDO LAS PRIMERAS DOS FILAS
 
-DELETE FROM m2015 WHERE pais = 'What Country or Region do you live in?' OR pais = 'Response'
+DELETE FROM m2015 WHERE pais = 'Country' OR pais = 'Response'

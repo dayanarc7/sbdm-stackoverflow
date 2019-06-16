@@ -26,5 +26,3 @@ FROM (
 
 ALTER TABLE dw_stackoverflow ADD fk_tiempo INT NULL
 ALTER TABLE dw_stackoverflow ADD fk_ubicacion INT NULL
-
-SELECT * FROM dw_stackoverflow

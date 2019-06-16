@@ -168,6 +168,4 @@ ALTER TABLE m2012 DROP COLUMN ocupacion
  UPDATE m2012 SET ingresos = NULL WHERE ingresos = 'Rather not say'
 
  --ELIMINANDO LAS PRIMERAS DOS FILAS
-
 DELETE FROM m2012 WHERE pais = 'What Country or Region do you live in?' OR pais = 'Response'
-
