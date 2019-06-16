@@ -23,3 +23,8 @@ FROM (
 	SELECT año tiempo, pais, experiencia, ingresos, lenguaje_java, lenguaje_javascript, lenguaje_php, lenguaje_python, lenguaje_ruby, lenguaje_sql, lenguaje_c#, [lenguaje_c++], ocupacion_Desktop, ocupacion_System, ocupacion_Database, ocupacion_Embedded, ocupacion_Web
 	FROM m2016
 ) t
+
+ALTER TABLE dw_stackoverflow ADD fk_tiempo INT NULL
+ALTER TABLE dw_stackoverflow ADD fk_ubicacion INT NULL
+
+SELECT * FROM dw_stackoverflow
