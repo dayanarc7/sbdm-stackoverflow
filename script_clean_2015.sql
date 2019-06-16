@@ -232,10 +232,9 @@ SELECT [column1] pais
    -- CREANDO LA TABLA CON LOS CAMPOS COMUNES
   DROP TABLE IF EXISTS m2015
   SELECT pais
-      , sexo 
       , experiencia
       , ocupacion
-      , sistemaoperativo
+	  , ingresos
       ,[lenguaje_c++]
       ,lenguaje_c#
       ,lenguaje_java
@@ -269,6 +268,57 @@ SELECT [column1] pais
   UPDATE m2015 SET lenguaje_c# = CASE WHEN lenguaje_c# IS NULL THEN 0 ELSE 1 END
   UPDATE m2015 SET [lenguaje_c++] = CASE WHEN [lenguaje_c++] IS NULL THEN 0 ELSE 1 END
 
+--MODIFICANDO EL CAMPO INGRESOS
+UPDATE m2015 SET ingresos = NULL WHERE ingresos = 'Unemployed'
+UPDATE m2015 SET ingresos = NULL WHERE ingresos = 'Rather not say'
+UPDATE m2015 SET ingresos = REPLACE(ingresos, 'Less than ','<')
+UPDATE m2015 SET ingresos = REPLACE(ingresos, '$140,000 - $160,000','>$140,000')
+UPDATE m2015 SET ingresos = REPLACE(ingresos, 'More than $160,000','>$140,000')
 
+-- MODIFICANDO EL CAMPO  OCUPACION
+UPDATE m2015 SET ocupacion = REPLACE (ocupacion, 'Front-End Web Developer', 'Web developer')
+UPDATE m2015 SET ocupacion = REPLACE (ocupacion, 'Full-Stack Web Developer', 'Web developer')
+UPDATE m2015 SET ocupacion = REPLACE (ocupacion, 'Back-End Web Developer', 'Web developer')
 
+ALTER TABLE m2015 ADD [ocupacion_Desktop] [int] NULL
+ALTER TABLE m2015 ADD [ocupacion_System] [int] NULL
+ALTER TABLE m2015 ADD [ocupacion_Database] [int] NULL
+ALTER TABLE m2015 ADD [ocupacion_Embedded] [int] NULL
+ALTER TABLE m2015 ADD [ocupacion_Web] [int] NULL
 
+--Cursor para desagregar lenguajes
+DECLARE @order INT
+DECLARE @ocupacion VARCHAR(50)
+
+DECLARE cursor_ocupacion CURSOR FOR 
+	SELECT 1, 'Desktop'
+	UNION
+	SELECT 2, 'System'
+	UNION
+	SELECT 3, 'Database'
+	UNION
+	SELECT 4, 'Embedded'
+	UNION
+	SELECT 5, 'Web'
+	ORDER BY 1
+
+OPEN cursor_ocupacion
+
+FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	EXECUTE('
+		UPDATE m2015
+		SET [ocupacion_' + @ocupacion + '] = CASE WHEN ocupacion LIKE ''%' + @ocupacion + '%'' THEN 1 ELSE 0 END, 
+		  ocupacion = REPLACE(ocupacion,''' + @ocupacion + ''','''')
+	')
+
+	FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+END 
+
+CLOSE cursor_ocupacion
+DEALLOCATE cursor_ocupacion
+
+SELECT * FROM m2015 

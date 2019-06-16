@@ -84,25 +84,8 @@ SELECT [column1] pais
   -- CREANDO LA TABLA CON LOS CAMPOS COMUNES
   DROP TABLE IF EXISTS m2012
   SELECT pais
-      ,sector
 	  ,experiencia
-      ,tamaño_empresa
       ,ocupacion
-      ,rol_influencer		
-      ,rol_recommender
-      ,rol_approver
-      ,rol_purchaser
-      ,rol_check_writer
-      ,rol_no_invoment
-      ,rol_seller
-      ,comprador_hardware
-      ,comprador_servers
-      ,comprador_sowtware
-      ,comprador_monitors_pcs_laptops
-      ,comprador_consultants
-      ,comprador_other
-      ,presupuesto
-      ,tipo_proyecto
       ,lenguaje_java
       ,lenguaje_javascript
       ,lenguaje_php
@@ -111,29 +94,7 @@ SELECT [column1] pais
       ,lenguaje_sql
       ,lenguaje_c#
       ,[lenguaje_c++]
-      ,sistema_operativo
-      ,satisfaccion
       ,ingresos
-      ,producto_iphone
-      ,producto_android
-      ,producto_blackberry
-      ,producto_windowsphone
-      ,producto_other_smart_phone
-      ,producto_regular
-      ,producto_kindle
-      ,producto_nook
-      ,producto_appletv
-      ,producto_boxee
-      ,producto_streaming_device
-      ,producto_netbook
-      ,producto_ps3
-      ,producto_xbox
-      ,producto_wii
-      ,producto_other_gaming
-      ,producto_kindlefire
-      ,producto_ipad
-      ,producto_othertablet
-      ,producto_other
   	  ,año INTO m2012
   FROM clean2012
 
@@ -156,4 +117,54 @@ SELECT [column1] pais
   UPDATE m2012 SET lenguaje_c# = CASE WHEN lenguaje_c# IS NULL THEN 0 ELSE 1 END
   UPDATE m2012 SET [lenguaje_c++] = CASE WHEN [lenguaje_c++] IS NULL THEN 0 ELSE 1 END
 
-  select * from m2012
+  
+-- -- MODIFICANDO EL CAMPO OCUPACION
+
+ALTER TABLE m2012 ADD [ocupacion_Desktop] [int] NULL
+ALTER TABLE m2012 ADD [ocupacion_Staff] [int] NULL
+ALTER TABLE m2012 ADD [ocupacion_Database] [int] NULL
+ALTER TABLE m2012 ADD [ocupacion_Embedded] [int] NULL
+ALTER TABLE m2012 ADD [ocupacion_Web] [int] NULL
+
+--Cursor para desagregar lenguajes
+DECLARE @order INT
+DECLARE @ocupacion VARCHAR(50)
+
+DECLARE cursor_ocupacion CURSOR FOR 
+	SELECT 1, 'Desktop'
+	UNION
+	SELECT 2, 'Staff'
+	UNION
+	SELECT 3, 'Database'
+	UNION
+	SELECT 4, 'Embedded'
+	UNION
+	SELECT 5, 'Web'
+	ORDER BY 1
+
+OPEN cursor_ocupacion
+
+FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	EXECUTE('
+		UPDATE m2012
+		SET [ocupacion_' + @ocupacion + '] = CASE WHEN ocupacion LIKE ''%' + @ocupacion + '%'' THEN 1 ELSE 0 END, 
+		  ocupacion = REPLACE(ocupacion,''' + @ocupacion + ''','''')
+	')
+
+	FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+END 
+
+CLOSE cursor_ocupacion
+DEALLOCATE cursor_ocupacion
+
+ -- MODIFICANDO EL CAMPO INGRESOS
+ UPDATE m2012 SET ingresos = NULL WHERE ingresos = 'Student / Unemployed'
+ UPDATE m2012 SET ingresos = NULL WHERE ingresos = 'Rather not say'
+
+ select *from m2012
+
+ 

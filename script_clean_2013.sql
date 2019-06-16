@@ -138,28 +138,7 @@ SELECT [column1] pais
   DROP TABLE IF EXISTS m2013
   SELECT pais
       ,experiencia
-      ,sector
-      ,tamaño_empresa
       ,ocupacion
-      ,plataforma_mobil_iphone
-      ,plataforma_mobil_ipad
-      ,plataforma_mobil_androidphone
-      ,plataforma_mobil_androidtablet
-      ,plataforma_mobil_blackberry
-      ,rol_recommender
-      ,rol_influencer
-      ,rol_approver
-      ,rol_purchaser
-      ,rol_check_writer
-      ,rol_no_involvement
-      ,rol_seller
-      ,comprador_hardware
-      ,comprador_servers
-      ,comprador_sowtware
-      ,comprador_monitors_pcs_laptops
-      ,comprador_consultants
-      ,comprador_other
-      ,presupuesto
       ,[lenguaje_c++]
       ,lenguaje_c#
       ,lenguaje_java
@@ -168,34 +147,7 @@ SELECT [column1] pais
       ,lenguaje_python
       ,lenguaje_ruby
       ,lenguaje_sql
-      ,tecnologia_favorita_nodejs
-      ,tecnologia_favorita_haskell
-      ,tecnologia_favorita_coffeescript
-      ,tecnologia_favorita_dart
-      ,tecnologia_favorita_typescript
-      ,tecnologia_favorita_cpp11
-      ,tecnologia_favorita_winrt
-      ,tecnologia_favorita_redis
-      ,tecnologia_favorita_mongodb
-      ,tecnologia_favorita_f#
-      ,tecnologia_favorita_phonegap
-      , sistema_operativo
-      , satisfaccion
       , ingresos
-      , producto_iphone
-      , producto_android
-      , producto_blackberry
-      , producto_windowsphone
-      , producto_ipad
-      , producto_androidtablet
-      , producto_kindlefire
-      , producto_windowstablet
-      , producto_kindle
-	  , producto_nook
-      , producto_ps3
-      , producto_xbox
-      , producto_wii
-      , producto_other
 	  , año INTO m2013 
   FROM clean2013
 
@@ -218,4 +170,58 @@ SELECT [column1] pais
   UPDATE m2013 SET lenguaje_c# = CASE WHEN lenguaje_c# IS NULL THEN 0 ELSE 1 END
   UPDATE m2013 SET [lenguaje_c++] = CASE WHEN [lenguaje_c++] IS NULL THEN 0 ELSE 1 END
 
-    select * from m2013
+  -- MODIFICANDO EL CAMPO OCUPACION
+    
+UPDATE m2013 SET ocupacion = REPLACE (ocupacion, 'Front-End Web Developer', 'Web developer')
+UPDATE m2013 SET ocupacion = REPLACE (ocupacion, 'Full-Stack Web Developer', 'Web developer')
+UPDATE m2013 SET ocupacion = REPLACE (ocupacion, 'Back-End Web Developer', 'Web developer')
+
+ALTER TABLE m2013 ADD [ocupacion_Desktop] [int] NULL
+ALTER TABLE m2013 ADD [ocupacion_Staff] [int] NULL
+ALTER TABLE m2013 ADD [ocupacion_Database] [int] NULL
+ALTER TABLE m2013 ADD [ocupacion_Embedded] [int] NULL
+ALTER TABLE m2013 ADD [ocupacion_Web] [int] NULL
+
+--Cursor para desagregar lenguajes
+DECLARE @order INT
+DECLARE @ocupacion VARCHAR(50)
+
+DECLARE cursor_ocupacion CURSOR FOR 
+	SELECT 1, 'Desktop'
+	UNION
+	SELECT 2, 'Staff'
+	UNION
+	SELECT 3, 'Database'
+	UNION
+	SELECT 4, 'Embedded'
+	UNION
+	SELECT 5, 'Web'
+	ORDER BY 1
+
+OPEN cursor_ocupacion
+
+FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	EXECUTE('
+		UPDATE m2013
+		SET [ocupacion_' + @ocupacion + '] = CASE WHEN ocupacion LIKE ''%' + @ocupacion + '%'' THEN 1 ELSE 0 END, 
+		  ocupacion = REPLACE(ocupacion,''' + @ocupacion + ''','''')
+	')
+
+	FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+END 
+
+CLOSE cursor_ocupacion
+DEALLOCATE cursor_ocupacion
+
+
+
+ -- MODIFICANDO EL CAMPO INGRESOS
+UPDATE m2013 SET ingresos = NULL WHERE ingresos = 'Student / Unemployed'
+UPDATE m2013 SET ingresos = NULL WHERE ingresos = 'Rather not say'
+
+
+SELECT * from m2013

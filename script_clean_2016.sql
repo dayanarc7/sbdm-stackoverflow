@@ -79,7 +79,6 @@ SELECT [column1]
       ,experiencia
 	  , lenguaje
       , ingresos
-      , sistemaoperativo
 	  ,año INTO m2016
   FROM clean2016
 
@@ -104,6 +103,7 @@ ALTER TABLE m2016 ADD [lenguaje_javascript] [int] NULL
 ALTER TABLE m2016 ADD [lenguaje_sql] [int] NULL
 ALTER TABLE m2016 ADD [lenguaje_php] [int] NULL
 ALTER TABLE m2016 ADD [lenguaje_ruby] [int] NULL
+ALTER TABLE m2016 ADD [lenguaje_c++] [int] NULL
 
 --Cursor para desagregar lenguajes
 DECLARE @order INT
@@ -124,7 +124,7 @@ DECLARE cursor_lenguajes CURSOR FOR
 	UNION
 	SELECT 7, 'Ruby'
 	UNION
-	SELECT 8, '[C++]'
+	SELECT 8, 'C++'
 	ORDER BY 1
 
 OPEN cursor_lenguajes 
@@ -136,7 +136,7 @@ BEGIN
 
 	EXECUTE('
 		UPDATE m2016 
-		SET lenguaje_' + @lenguaje + ' = CASE WHEN lenguaje LIKE ''%' + @lenguaje + '%'' THEN 1 ELSE 0 END, 
+		SET [lenguaje_' + @lenguaje + '] = CASE WHEN lenguaje LIKE ''%' + @lenguaje + '%'' THEN 1 ELSE 0 END, 
 		   lenguaje = REPLACE(lenguaje,''' + @lenguaje + ''','''')
 	')
 
@@ -146,4 +146,74 @@ END
 CLOSE cursor_lenguajes
 DEALLOCATE cursor_lenguajes
 
-  SELECT * from m2016
+
+--MODIFICANDO EL CAMPO INGRESOS
+UPDATE m2016 SET ingresos = NULL WHERE ingresos = 'Other (please specify)'
+UPDATE m2016 SET ingresos = NULL WHERE ingresos = 'Rather not say'
+UPDATE m2016 SET ingresos = NULL WHERE ingresos = 'Unemployed'
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$10,000 - $20,000','<$20,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, 'Less than $10,000','<$20,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$140,000 - $150,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$150,000 - $160,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$160,000 - $170,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$170,000 - $180,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$180,000 - $190,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$190,000 - $200,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, 'More than $200,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, 'More than $200,000','>$140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$100,000 - $110,000','$100,000 - $120,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$110,000 - $120,000','$100,000 - $120,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$120,000 - $130,000','$120,000 - $140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$130,000 - $140,000','$120,000 - $140,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$80,000 - $90,000','$80,000 - $100,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$90,000 - $100,000','$80,000 - $100,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$60,000 - $70,000','$60,000 - $80,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$70,000 - $80,000','$60,000 - $80,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$40,000 - $50,000','$40,000 - $60,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$50,000 - $60,000','$40,000 - $60,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$20,000 - $30,000','$20,000 - $40,000')
+UPDATE m2016 SET ingresos = REPLACE(ingresos, '$30,000 - $40,000','$20,000 - $40,000')
+
+-- MODIFICANDO EL CAMPO  OCUPACION
+UPDATE m2016 SET ocupacion = REPLACE (ocupacion, 'Front-End Web Developer', 'Web developer')
+UPDATE m2016 SET ocupacion = REPLACE (ocupacion, 'Full-Stack Web Developer', 'Web developer')
+UPDATE m2016 SET ocupacion = REPLACE (ocupacion, 'Back-End Web Developer', 'Web developer')
+
+ALTER TABLE m2016 ADD [ocupacion_Desktop] [int] NULL
+ALTER TABLE m2016 ADD [ocupacion_System] [int] NULL
+ALTER TABLE m2016 ADD [ocupacion_Database] [int] NULL
+ALTER TABLE m2016 ADD [ocupacion_Embedded] [int] NULL
+ALTER TABLE m2016 ADD [ocupacion_Web] [int] NULL
+
+--Cursor para desagregar lenguajes
+DECLARE @ocupacion VARCHAR(50)
+
+DECLARE cursor_ocupacion CURSOR FOR 
+	SELECT 'Desktop'
+	UNION
+	SELECT 'System'
+	UNION
+	SELECT 'Database'
+	UNION
+	SELECT 'Embedded'
+	UNION
+	SELECT 'Web'
+
+OPEN cursor_ocupacion
+
+FETCH NEXT FROM cursor_ocupacion INTO @ocupacion
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	EXECUTE('
+		UPDATE m2016
+		SET [ocupacion_' + @ocupacion + '] = CASE WHEN ocupacion LIKE ''%' + @ocupacion + '%'' THEN 1 ELSE 0 END, 
+		  ocupacion = REPLACE(ocupacion,''' + @ocupacion + ''','''')
+	')
+
+	FETCH NEXT FROM cursor_ocupacion INTO @ocupacion
+END 
+
+CLOSE cursor_ocupacion
+DEALLOCATE cursor_ocupacion

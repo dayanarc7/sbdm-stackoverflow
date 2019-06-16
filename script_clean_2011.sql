@@ -2,6 +2,7 @@ USE [stackoverflow]
 GO
 
 -- CREANDO LA TABLA CON LOS CAMPOS DE TODAS LAS COLUMNAS
+
 DROP TABLE IF EXISTS clean2011
 SELECT [column1] pais
       ,[column2] estado
@@ -71,79 +72,87 @@ SELECT [column1] pais
   FROM [dbo].[s2011]
 
 -- CREANDO LA TABLA CON LOS CAMPOS COMUNES
-  DROP TABLE IF EXISTS m2011
-  SELECT pais
-	  ,experiencia
-      ,sector
-      ,tamaño_empresa
-      ,ocupacion
-      ,rol_influencer
-      ,rol_recommender
-      ,rol_approver
-      ,rol_purchaser
-      ,rol_check_writer
-      ,rol_no_involvement
-      ,rol_seller
-      ,comprador_hardware
-      ,comprador_servers
-      ,comprador_sowtware
-      ,comprador_monitors_pcs_laptops
-      ,comprador_consultants
-      ,comprador_other
-      ,presupuesto_menor_10000
-      ,presupuesto_10001_25000
-      ,presupuesto_25001_40000
-      ,presupuesto_41000_75000
-      ,presupuesto_75001_100000
-      ,presupuesto_100001_150000
-      ,presupuesto_mayor_150000
-      ,pesupuesto_dont_know
-      ,lenguaje_java
-      ,lenguaje_javascript
-      ,lenguaje_php
-      ,lenguaje_python
-      ,lenguaje_ruby
-      ,lenguaje_sql
-      ,lenguaje_c#
-      ,[lenguaje_c++]
-      ,sistema_operativo
-      ,satisfaccion
-      ,ingresos
-      ,producto_iphone
-      ,producto_android
-      ,producto_blackberry
-      ,producto_other_smart_phone
-      ,producto_regular
-      ,producto_kindle
-      ,producto_nook
-      ,producto_bluray
-      ,producto_hdtv
-      ,producto_appletv
-      ,producto_ipad
-      ,producto_other_netbook
-      ,prodcuto_ps3
-      ,producto_xbox
-      ,producto_wii
-	  , año INTO m2011
-  FROM clean2011
 
-  -- ELIMINANDO LOS DOS PRIMEROS REGISTROS
+DROP TABLE IF EXISTS m2011
+SELECT pais
+	,experiencia
+    ,ocupacion
+    ,lenguaje_java
+    ,lenguaje_javascript
+    ,lenguaje_php
+    ,lenguaje_python
+    ,lenguaje_ruby
+    ,lenguaje_sql
+    ,lenguaje_c#
+    ,[lenguaje_c++]
+    ,ingresos
+	, año INTO m2011
+FROM clean2011
 
-  -- MODIFICANDO EL CAMPO EXPERIENCIA
+-- MODIFICANDO EL CAMPO EXPERIENCIA
 
-  UPDATE m2011 SET experiencia = REPLACE (experiencia, '41310', '2-5')
-  UPDATE m2011 SET experiencia = REPLACE (experiencia, '41435', '6-10')
+UPDATE m2011 SET experiencia = REPLACE (experiencia, '41310', '2-5')
+UPDATE m2011 SET experiencia = REPLACE (experiencia, '41435', '6-10')
 
+-- MODIFICANDO EL CAMPO LENGUAJE
 
-  -- MODIFICANDO EL CAMPO LENGUAJE
-  
-  UPDATE m2011 SET lenguaje_java = CASE WHEN lenguaje_java IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET lenguaje_javascript = CASE WHEN lenguaje_javascript IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET lenguaje_php = CASE WHEN lenguaje_php IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET lenguaje_python = CASE WHEN lenguaje_python IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET lenguaje_ruby = CASE WHEN lenguaje_ruby IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET lenguaje_sql = CASE WHEN lenguaje_sql IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET lenguaje_c# = CASE WHEN lenguaje_c# IS NULL THEN 0 ELSE 1 END
-  UPDATE m2011 SET [lenguaje_c++] = CASE WHEN [lenguaje_c++] IS NULL THEN 0 ELSE 1 END
- 
- select * from m2011
+UPDATE m2011 SET lenguaje_java = CASE WHEN lenguaje_java IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET lenguaje_javascript = CASE WHEN lenguaje_javascript IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET lenguaje_php = CASE WHEN lenguaje_php IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET lenguaje_python = CASE WHEN lenguaje_python IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET lenguaje_ruby = CASE WHEN lenguaje_ruby IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET lenguaje_sql = CASE WHEN lenguaje_sql IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET lenguaje_c# = CASE WHEN lenguaje_c# IS NULL THEN 0 ELSE 1 END
+UPDATE m2011 SET [lenguaje_c++] = CASE WHEN [lenguaje_c++] IS NULL THEN 0 ELSE 1 END
+
+-- MODIFICANDO EL CAMPO OCUPACION
+
+ALTER TABLE m2011 ADD [ocupacion_Desktop] [int] NULL
+ALTER TABLE m2011 ADD [ocupacion_Staff] [int] NULL
+ALTER TABLE m2011 ADD [ocupacion_Database] [int] NULL
+ALTER TABLE m2011 ADD [ocupacion_Embedded] [int] NULL
+ALTER TABLE m2011 ADD [ocupacion_Web] [int] NULL
+
+DECLARE @order INT
+DECLARE @ocupacion VARCHAR(50)
+
+DECLARE cursor_ocupacion CURSOR FOR 
+	SELECT 1, 'Desktop'
+	UNION
+	SELECT 2, 'Staff'
+	UNION
+	SELECT 3, 'Database'
+	UNION
+	SELECT 4, 'Embedded'
+	UNION
+	SELECT 5, 'Web'
+	ORDER BY 1
+
+OPEN cursor_ocupacion
+
+FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	EXECUTE('
+		UPDATE m2011 
+		SET [ocupacion_' + @ocupacion + '] = CASE WHEN ocupacion LIKE ''%' + @ocupacion + '%'' THEN 1 ELSE 0 END, 
+		  ocupacion = REPLACE(ocupacion,''' + @ocupacion + ''','''')
+	')
+
+	FETCH NEXT FROM cursor_ocupacion INTO @order, @ocupacion
+END 
+
+CLOSE cursor_ocupacion
+DEALLOCATE cursor_ocupacion
+
+ALTER TABLE m2011 DROP COLUMN ocupacion
+
+-- MODIFICANDO EL CAMPO INGRESOS
+
+ UPDATE m2011 SET ingresos = NULL WHERE ingresos = 'Student / Unemployed'
+
+ --ELIMINANDO LAS PRIMERAS DOS FILAS
+
+DELETE FROM m2011 WHERE pais = 'What Country or Region do you live in?' OR pais = 'Response'

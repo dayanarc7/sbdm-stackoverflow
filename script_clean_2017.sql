@@ -5,7 +5,7 @@ GO
 DROP TABLE IF EXISTS clean2017
 
 SELECT [Respondent]
-      ,[Professional] ocupacion
+      ,[Professional] 
       ,[ProgramHobby] 
       ,[Country] pais
       ,[University] universidad
@@ -18,10 +18,10 @@ SELECT [Respondent]
       ,[YearsProgram] experiencia
       ,[YearsCodedJob]
       ,[YearsCodedJobPast]
-      ,[DeveloperType]
-      ,[WebDeveloperType]
-      ,[MobileDeveloperType]
-      ,[NonDeveloperType]
+      ,[DeveloperType] ocupacion
+      ,[WebDeveloperType] tipo_desarrolladores_web
+      ,[MobileDeveloperType] tipo_desarrolladores_mobiles
+      ,[NonDeveloperType] 
       ,[CareerSatisfaction]
       ,[JobSatisfaction]
       ,[ExCoderReturn]
@@ -162,12 +162,11 @@ SELECT [Respondent]
   FROM [dbo].[s2017]
 
  DROP TABLE IF EXISTS m2017
- SELECT ocupacion
-      ,pais
-      ,tamaño_empresa
-      ,[CompanyType]
+ SELECT pais
       , experiencia
+	  ,ocupacion
       ,[HaveWorkedLanguage]
+	  , Currency
       , ingresos
 	  ,año INTO m2017
   FROM clean2017
@@ -198,8 +197,6 @@ SELECT [Respondent]
   UPDATE m2017 SET experiencia = REPLACE (experiencia, '19 to 20 years', '11')
   UPDATE m2017 SET experiencia = REPLACE (experiencia, '20 or more years', '11')
 
-  SELECT * FROM m2017
-
  -- MODIFICAR CAMPO LENGUAJE
 
 --Agregar columnas para cada lenguaje
@@ -210,6 +207,7 @@ ALTER TABLE m2017 ADD [lenguaje_javascript] [int] NULL
 ALTER TABLE m2017 ADD [lenguaje_sql] [int] NULL
 ALTER TABLE m2017 ADD [lenguaje_php] [int] NULL
 ALTER TABLE m2017 ADD [lenguaje_ruby] [int] NULL
+ALTER TABLE m2017 ADD [lenguaje_c++] [int] NULL
 
 --Cursor para desagregar lenguajes
 DECLARE @order INT
@@ -241,8 +239,8 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 
 	EXECUTE('
-		UPDATE clean2017 
-		SET lenguaje_' + @lenguaje + ' = CASE WHEN HaveWorkedLanguage LIKE ''%' + @lenguaje + '%'' THEN 1 ELSE 0 END, 
+		UPDATE m2017 
+		SET [lenguaje_' + @lenguaje + '] = CASE WHEN HaveWorkedLanguage LIKE ''%' + @lenguaje + '%'' THEN 1 ELSE 0 END, 
 		   HaveWorkedLanguage = REPLACE(HaveWorkedLanguage,''' + @lenguaje + ''','''')
 	')
 
@@ -251,3 +249,48 @@ END
 
 CLOSE cursor_lenguajes
 DEALLOCATE cursor_lenguajes
+
+-- MODIFICANDO EL CAMPO  OCUPACION
+
+ALTER TABLE m2017 ADD [ocupacion_Desktop] [int] NULL
+ALTER TABLE m2017 ADD [ocupacion_Systems] [int] NULL
+ALTER TABLE m2017 ADD [ocupacion_Database] [int] NULL
+ALTER TABLE m2017 ADD [ocupacion_Embedded] [int] NULL
+ALTER TABLE m2017 ADD [ocupacion_Web] [int] NULL
+				
+--Cursor para desagregar lenguajes
+DECLARE @order2 INT
+DECLARE @ocupacion VARCHAR(50)
+
+DECLARE cursor_ocupacion CURSOR FOR 
+	SELECT 1, 'Desktop'
+	UNION
+	SELECT 2, 'Systems'
+	UNION
+	SELECT 3, 'Database'
+	UNION
+	SELECT 4, 'Embedded'
+	UNION
+	SELECT 5, 'Web'
+	ORDER BY 1
+
+OPEN cursor_ocupacion
+
+FETCH NEXT FROM cursor_ocupacion INTO @order2, @ocupacion
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	EXECUTE('
+		UPDATE m2017
+		SET [ocupacion_' + @ocupacion + '] = CASE WHEN ocupacion LIKE ''%' + @ocupacion + '%'' THEN 1 ELSE 0 END, 
+		  ocupacion = REPLACE(ocupacion,''' + @ocupacion + ''','''')
+	')
+
+	FETCH NEXT FROM cursor_ocupacion INTO @order2, @ocupacion
+END 
+
+CLOSE cursor_ocupacion
+DEALLOCATE cursor_ocupacion
+
+SELECT * FROM m2017
