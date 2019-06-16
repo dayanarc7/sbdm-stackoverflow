@@ -1,54 +1,43 @@
-ALTER TABLE dw_stackoverflow DROP CONSTRAINT IF EXISTS FK_ubicacion
+ALTER TABLE dw_stackoverflow DROP CONSTRAINT IF EXISTS FK_ubicacion;
 DROP TABLE IF EXISTS ubicacion
 
--- CREACIÓN TABLA TIEMPO
+-- UNIFICACIÓN DE PAISES IGUALES CON DIFERENTE NOMBRE
+UPDATE dw_stackoverflow SET pais = 'Ireland' WHERE pais = 'Ireland {Republic}'
+UPDATE dw_stackoverflow SET pais = 'Macedonia' WHERE pais = 'Macedonia [FYROM]'
+UPDATE dw_stackoverflow SET pais = 'United States' WHERE pais = 'United States of America'
+UPDATE dw_stackoverflow SET pais = 'Bosnia Herzegovina' WHERE pais = 'Bosnia and Herzegovina'
+UPDATE dw_stackoverflow SET pais = 'Myanmar [Burma]' WHERE pais = 'Myanmar, {Burma}'
+UPDATE dw_stackoverflow SET pais = 'Russia' WHERE pais = 'Russian Federation'
+UPDATE dw_stackoverflow SET pais = 'Korea South' WHERE pais = 'South Korea'
 
+-- CREACIÓN TABLA UBICACIÓN
 CREATE TABLE [dbo].[ubicacion](
 	[id_ubicacion] [int] IDENTITY(1,1) NOT NULL,
-	[pais] [int] NOT NULL,
+	[pais] [nvarchar] (MAX) NOT NULL,
 	 CONSTRAINT [PK_ubicacion] PRIMARY KEY CLUSTERED 
 	(
 		[id_ubicacion] ASC
-	),
-	 CONSTRAINT [IX_ubicacion] UNIQUE NONCLUSTERED 
-	(
-		[pais] ASC
 	)
 )
 
--- NORMALIZACIÓN TIEMPO
+-- NORMALIZACIÓN UBICACIÓN
 INSERT INTO ubicacion
 SELECT DISTINCT pais
 FROM dw_stackoverflow
-ORDER BY pais
+WHERE pais IS NOT NULL
 
 -- ACTUALIZACIÓN DE LA LLAVE FORÁNEA
 UPDATE s
-SET s.tiempo = t.id_tiempo
+SET s.fk_ubicacion = u.id_ubicacion
 --SELECT *
 FROM dw_stackoverflow s
-INNER JOIN tiempo t ON t.año = s.tiempo
+INNER JOIN ubicacion u ON u.pais = s.pais
 
 -- CONFIGURACIÓN LLAVE FORÁNEA
 ALTER TABLE dw_stackoverflow 
-ADD CONSTRAINT FK_tiempo
-FOREIGN KEY (tiempo) REFERENCES tiempo(id_tiempo)
+ADD CONSTRAINT FK_ubicacion
+FOREIGN KEY (fk_ubicacion) REFERENCES ubicacion(id_ubicacion)
 
-
-
----------------------
--- VERIFICAR NOMBRE DE PAISES REPETIDOS
-WITH paises AS
-(
-	SELECT DISTINCT pais
-	FROM dw_stackoverflow
-)
-
-SELECT *
-FROM (
-	SELECT LEFT(pais,8) l_pais, COUNT(*) cant
-	FROM paises
-	GROUP BY LEFT(pais,8)
-	HAVING COUNT(*) > 1
-) t
-INNER JOIN paises p ON t.l_pais = LEFT(p.pais,8)
+-- ELIMINACIÓN COLUMNA PAIS
+ALTER TABLE dw_stackoverflow
+DROP COLUMN IF EXISTS pais

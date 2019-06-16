@@ -23,7 +23,7 @@ FROM dw_stackoverflow
 
 -- ACTUALIZACIÓN DE LA LLAVE FORÁNEA
 UPDATE s
-SET s.tiempo = t.id_tiempo
+SET s.fk_tiempo = t.id_tiempo
 --SELECT *
 FROM dw_stackoverflow s
 INNER JOIN tiempo t ON t.año = s.tiempo
@@ -31,4 +31,8 @@ INNER JOIN tiempo t ON t.año = s.tiempo
 -- CONFIGURACIÓN LLAVE FORÁNEA
 ALTER TABLE dw_stackoverflow 
 ADD CONSTRAINT FK_tiempo
-FOREIGN KEY (tiempo) REFERENCES tiempo(id_tiempo)
+FOREIGN KEY (fk_tiempo) REFERENCES tiempo(id_tiempo)
+
+-- ELIMINACIÓN COLUMNA TIEMPO
+ALTER TABLE dw_stackoverflow
+DROP COLUMN IF EXISTS tiempo
