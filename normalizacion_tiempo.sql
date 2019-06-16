@@ -1,5 +1,7 @@
--- CREACIÓN TABLA TIEMPO
+ALTER TABLE dw_stackoverflow DROP CONSTRAINT IF EXISTS FK_tiempo
 DROP TABLE IF EXISTS tiempo
+
+-- CREACIÓN TABLA TIEMPO
 
 CREATE TABLE [dbo].[tiempo](
 	[id_tiempo] [int] IDENTITY(1,1) NOT NULL,
@@ -28,4 +30,5 @@ INNER JOIN tiempo t ON t.año = s.tiempo
 
 -- CONFIGURACIÓN LLAVE FORÁNEA
 ALTER TABLE dw_stackoverflow 
-ADD FOREIGN KEY (tiempo) REFERENCES tiempo(id_tiempo)
+ADD CONSTRAINT FK_tiempo
+FOREIGN KEY (tiempo) REFERENCES tiempo(id_tiempo)
