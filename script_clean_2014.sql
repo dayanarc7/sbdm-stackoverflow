@@ -9,7 +9,7 @@ SELECT [column1] pais
       ,[column3] estado
       ,[column4] edad
       ,[column5] sexo
-	  ,[column5] experiencia
+	  ,[column6] experiencia
       ,[column7] ocupacion
       ,[column8] ingresos
       ,[column9] sector
@@ -128,6 +128,8 @@ SELECT [column1] pais
 
   -- CREANDO LA TABLA CON LOS CAMPOS COMUNES
   DROP TABLE IF EXISTS m2014
+  GO
+
   SELECT pais
 	  , experiencia
       , ocupacion
