@@ -161,10 +161,13 @@ END
 CLOSE cursor_ocupacion
 DEALLOCATE cursor_ocupacion
 
+ALTER TABLE m2011 DROP COLUMN ocupacion
+
  -- MODIFICANDO EL CAMPO INGRESOS
  UPDATE m2012 SET ingresos = NULL WHERE ingresos = 'Student / Unemployed'
  UPDATE m2012 SET ingresos = NULL WHERE ingresos = 'Rather not say'
 
- select *from m2012
+ --ELIMINANDO LAS PRIMERAS DOS FILAS
 
- 
+DELETE FROM m2012 WHERE pais = 'What Country or Region do you live in?' OR pais = 'Response'
+
