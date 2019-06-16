@@ -161,7 +161,7 @@ END
 CLOSE cursor_ocupacion
 DEALLOCATE cursor_ocupacion
 
-ALTER TABLE m2011 DROP COLUMN ocupacion
+ALTER TABLE m2012 DROP COLUMN ocupacion
 
  -- MODIFICANDO EL CAMPO INGRESOS
  UPDATE m2012 SET ingresos = NULL WHERE ingresos = 'Student / Unemployed'
