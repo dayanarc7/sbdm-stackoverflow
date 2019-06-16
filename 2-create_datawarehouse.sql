@@ -26,3 +26,5 @@ FROM (
 
 ALTER TABLE dw_stackoverflow ADD fk_tiempo INT NULL
 ALTER TABLE dw_stackoverflow ADD fk_ubicacion INT NULL
+ALTER TABLE dw_stackoverflow ADD fk_ingresos INT NULL
+ALTER TABLE dw_stackoverflow ADD fk_experiencia INT NULL
