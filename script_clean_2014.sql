@@ -213,3 +213,11 @@ END
 CLOSE cursor_ocupacion
 DEALLOCATE cursor_ocupacion
 
+ALTER TABLE m2014 DROP COLUMN ocupacion
+
+
+ --ELIMINANDO LAS PRIMERAS DOS FILAS
+
+DELETE FROM m2014 WHERE pais = 'What Country or Region do you live in?' OR pais = 'Response'
+
+
