@@ -1,3 +1,5 @@
+--VERIFICACIÓN DE CANTIDAD DE REGISTROS
+
 SELECT *
 FROM (
 	SELECT COUNT(*) cant
@@ -18,3 +20,19 @@ FROM (
 	SELECT COUNT(*)
 	FROM m2016
 ) t
+
+-- VERIFICACIÓN NOMBRE DE PAISES REPETIDOS
+WITH paises AS
+(
+	SELECT DISTINCT pais
+	FROM dw_stackoverflow
+)
+
+SELECT *
+FROM (
+	SELECT LEFT(pais,4) l_pais, COUNT(*) cant
+	FROM paises
+	GROUP BY LEFT(pais,4)
+	HAVING COUNT(*) > 1
+) t
+INNER JOIN paises p ON t.l_pais = LEFT(p.pais,4)
