@@ -1,5 +1,6 @@
 ALTER TABLE dw_stackoverflow DROP CONSTRAINT IF EXISTS FK_ubicacion;
 DROP TABLE IF EXISTS ubicacion
+GO
 
 -- UNIFICACIÓN DE PAISES IGUALES CON DIFERENTE NOMBRE
 UPDATE dw_stackoverflow SET pais = 'Ireland' WHERE pais = 'Ireland {Republic}'
